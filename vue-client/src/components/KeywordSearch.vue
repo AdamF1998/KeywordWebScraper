@@ -32,6 +32,7 @@
 
 <script lang="ts">
     import Vue from 'vue';
+    import axios, { AxiosError, AxiosResponse } from 'axios';
 
     enum resultState {
         default,
@@ -62,19 +63,18 @@
         },
         methods: {
             submitForm() {
-                fetch('KeywordWebScraper', {
-                    body: JSON.stringify({
-                        Url: this.url,
-                        Keywords: this.keywords
-                    }),
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
-                })
-                    .then(r => r.json())
-                    .then(json => {
-                        console.log(json);
 
-                        this.response = json as PostWebScrapeResponse;
+                const request = { url: this.url, keywords: this.keywords };
+                const headers = {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                };
+
+                axios.post('KeywordWebScraper', request, { headers })
+                    .then(response => {
+                        console.log(response.data);
+
+                        this.response = response.data.response;
 
                         if (this.response.occurences > 0) {
                             this.state = resultState.found;
@@ -84,6 +84,15 @@
                         }
 
                         return;
+                    })
+                    .catch((reason: AxiosError<{ additionalInfo: string }>) => {
+                        if (reason.response!.status === 400) {
+                            // client received an error response (5xx, 4xx)
+                            alert(reason.message);
+                        }
+                        else {
+                            // anything else
+                        }
                     });
             }
         }
