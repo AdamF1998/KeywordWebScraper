@@ -16,7 +16,7 @@
                 <div class="row result">
                     <div class="column">
                         <h5 class="secondary-text">Positions</h5>
-                        <h4 class="results-text">&nbsp;{{ response.resultPositions }}</h4>
+                        <h4 class="results-text">{{ response.resultPositions }}</h4>
                     </div>
                     <div class="column">
                         <h5 class="secondary-text">Occurences</h5>
