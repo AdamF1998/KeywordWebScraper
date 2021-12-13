@@ -2,6 +2,13 @@
     <div class="post">
         <div class="search-wrapper">
             <form @submit.prevent="submitForm">
+                <div v-if="modelstate.errors" class="row user-input">
+                    <p style="background-color:red; border-radius:25px;">
+                        <ul style="padding:0;">
+                            <li style="list-style:none; text-align:center;" v-for="error in modelstate.errors">{{error.join(' ')}}</li>
+                        </ul>
+                    </p>
+                </div>
                 <div class="row user-input">
                     <div class="column">
                         <input type="text" id="url-textbox" class="input" placeholder="Url" v-model="url" required />
@@ -16,13 +23,13 @@
                 <div class="row result">
                     <div class="column">
                         <h5 class="secondary-text">Positions</h5>
-                        <h4 class="results-text">{{ response.resultPositions }}</h4>
+                        <h4 class="results-text">{{response.resultPositions}}</h4>
                     </div>
                     <div class="column">
                         <h5 class="secondary-text">Occurences</h5>
-                        <h4 v-if="state == 0" class="results-text">{{ response.occurences }}</h4>
-                        <h4 v-if="state == 1" class="results-text found-results-text">{{ response.occurences }}</h4>
-                        <h4 v-if="state == 2" class="results-text no-results-text">{{ response.occurences }}</h4>
+                        <h4 v-if="state == 0" class="results-text">{{response.occurences}}</h4>
+                        <h4 v-if="state == 1" class="results-text found-results-text">{{response.occurences}}</h4>
+                        <h4 v-if="state == 2" class="results-text no-results-text">{{response.occurences}}</h4>
                     </div>
                 </div>
             </form>
@@ -46,15 +53,17 @@
     };
 
     interface Data {
-        url: string,
-        keywords: string,
-        response: PostWebScrapeResponse,
-        state: number
+        modelstate: {};
+        url: string;
+        keywords: string;
+        response: PostWebScrapeResponse;
+        state: number;
     }
 
     export default Vue.extend({
         data(): Data {
             return {
+                modelstate: {},
                 url: '',
                 keywords: '',
                 response: { occurences: 0, resultPositions: 'None' },
@@ -72,7 +81,7 @@
 
                 axios.post('KeywordWebScraper', request, { headers })
                     .then(response => {
-                        console.log(response.data);
+                        this.modelstate = {};
 
                         this.response = response.data.response;
 
@@ -88,10 +97,12 @@
                     .catch((reason: AxiosError<{ additionalInfo: string }>) => {
                         if (reason.response!.status === 400) {
                             // client received an error response (5xx, 4xx)
-                            alert(reason.message);
+                            this.modelstate = reason.response.data;
+                            console.log(reason.response.data);
                         }
                         else {
                             // anything else
+                            alert(reason.message);
                         }
                     });
             }
